@@ -3,7 +3,7 @@ setup-my-ubuntu-desktop
 
 Scripts to set up my Ubuntu desktop.
 
-The current target is Ubuntu 22.04.
+The current target is Ubuntu 22.04 with ZFS root partition.
 
 
 ```

@@ -25,3 +25,32 @@ sudo systemctl reboot
 PATH=/usr/local/go/bin:$PATH ./setup-vgrep.sh
 exec $SHELL -l
 ```
+
+## setup gpg
+
+Export gpg secret keys on my another Ubuntu machine with:
+```
+gpg --export-secret-keys > my-gpg-secret-keys
+```
+Input my passphrase.
+
+Copy it to my new machine.
+Copy my passphrase using KeePassXC and import my secret keys with:
+```
+gpg --import my-gpg-secret-keys
+```
+Paste my passphrase in the modal dialog.
+
+```
+if ! grep DEBFULLNAME ~/.profile; then
+cat >> ~/.profile <<'EOF'
+
+# http://manpages.ubuntu.com/manpages/precise/en/man1/dch.1.html
+DEBFULLNAME="Hiroaki Nakamura"
+DEBEMAIL="hnakamur@gmail.com"
+
+# https://askubuntu.com/questions/186329/how-to-automate-the-pass-phrases-when-gpg-signing-dpkg-buildpackage
+GPGKEY=0x1DFBC664
+EOF
+fi
+```

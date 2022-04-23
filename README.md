@@ -54,3 +54,9 @@ GPGKEY=0x1DFBC664
 EOF
 fi
 ```
+
+## Add bookmark for searching with Google English to Firefox
+
+Name: Google en
+URL: https://www.google.co.jp/search?q=%s&hl=en
+Keyword: g

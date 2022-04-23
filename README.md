@@ -7,6 +7,7 @@ The current target is Ubuntu 22.04 with ZFS root partition.
 
 
 ```
+./enable-apt-deb-src.sh
 ./swap-capslock-ctrl.sh
 ./setup-mozc.sh
 sudo systemctl reboot
@@ -14,6 +15,8 @@ sudo systemctl reboot
 
 ```
 ./setup-keepassxc.sh
+./setup-google-chrome.sh
+./setup-vim.sh
 ./setup-ghq.sh
 ./setup-github-cli.sh
 ./setup-github-hub.sh
@@ -24,6 +27,10 @@ sudo systemctl reboot
 ./setup-go.sh
 PATH=/usr/local/go/bin:$PATH ./setup-vgrep.sh
 exec $SHELL -l
+```
+
+```
+./setup-lxd.sh
 ```
 
 ## setup gpg
@@ -53,6 +60,21 @@ DEBEMAIL="hnakamur@gmail.com"
 GPGKEY=0x1DFBC664
 EOF
 fi
+```
+
+## setup environments for building deb packages at Ubuntu PPA (Personal Package Archives)
+
+```
+./setup-ubuntu-src-pkg-downloader.sh
+./setup-ppa-files-downloader.sh
+./setup-git-buildpackage.sh
+./setup-sbuild.sh
+```
+
+## setup environments for building RPMs at Fedora Copr
+
+```
+setup-copr-files-downloader.sh
 ```
 
 ## Add bookmark for searching with Google English to Firefox

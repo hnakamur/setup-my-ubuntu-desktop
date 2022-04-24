@@ -82,3 +82,13 @@ setup-copr-files-downloader.sh
 Name: Google en
 URL: https://www.google.co.jp/search?q=%s&hl=en
 Keyword: g
+
+## Uninstall snap Firefox and install Mozilla's official Firefox pacakge
+
+```
+sudo snap remove firefox
+```
+
+```
+./setup-firefox-official-package.sh
+```

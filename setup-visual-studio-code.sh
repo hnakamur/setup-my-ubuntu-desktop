@@ -4,7 +4,7 @@ set -eu
 extensions="
   golang.go
   tiehuis.zig
-  augusterame.zls-vscode
+  AugusteRame.zls-vscode
 "
 
 install_deb_packages() {
@@ -44,6 +44,13 @@ add_apt_list() {
   fi
 }
 
+jq_replace_file() {
+  input_file="${@: -1}"
+  tmpfile=$(mktemp -p $(dirname "$input_file"))
+  jq "$@" > "$tmpfile" && mv "$tmpfile" "$input_file"
+  rm -f "$tmpfile"
+}
+
 key_path=/etc/apt/trusted.gpg.d/packages.microsoft.gpg
 
 install_deb_packages curl gpg apt-transport-https
@@ -54,4 +61,11 @@ install_extensions $extensions
 
 #uninstall_extensions $extensions
 
-#user_config_path="$HOME/.config/Code/User/settings.json"
+zls_path="$HOME/zls/zls"
+
+user_config_path="$HOME/.config/Code/User/settings.json"
+[ -f "$user_config_path" ] || echo '{}' > "$user_config_path"
+jq_replace_file '."zigLanguageClient.path" |= "'"$zls_path"'" |
+  setpath(["[zig]", "editor.defaultFormatter"]; "tiehuis.zig") |
+  ."zig.buildOnSave" |= true
+  ' "$user_config_path"

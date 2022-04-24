@@ -7,7 +7,7 @@ The current target is Ubuntu 22.04 with ZFS root partition.
 
 ```
 sudo apt update
-sudo apt install -y curl
+sudo apt install -y curl jq
 ```
 
 ```

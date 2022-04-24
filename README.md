@@ -5,6 +5,10 @@ Scripts to set up my Ubuntu desktop.
 
 The current target is Ubuntu 22.04 with ZFS root partition.
 
+```
+sudo apt update
+sudo apt install -y curl
+```
 
 ```
 ./enable-apt-deb-src.sh

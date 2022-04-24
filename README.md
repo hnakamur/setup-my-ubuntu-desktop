@@ -95,12 +95,3 @@ sudo snap remove firefox
 
 ```
 ./setup-firefox-official-package.sh
-
-## Install Visual Studio Code
-
-Download 64bit .deb package at https://code.visualstudio.com/download
-Then install with the following command:
-
-```
-sudo apt install -y /path/to/downloaded-deb-file
-```

@@ -5,6 +5,8 @@ extensions="
   golang.go
   tiehuis.zig
   AugusteRame.zls-vscode
+  matklad.rust-analyzer
+  tamasfe.even-better-toml
 "
 
 install_deb_packages() {

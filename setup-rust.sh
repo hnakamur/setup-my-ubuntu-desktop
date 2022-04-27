@@ -18,6 +18,13 @@ install_rust_nightly() {
   fi
 }
 
+install_rustup_nightly_components() {
+  installed=$(rustup component list --installed)
+  for comp in "$@"; do
+    echo "$installed" | grep -qxF "$comp" || echo "$comp"
+  done | xargs -r -n 1 rustup component add
+}
+
 install_cargo_tools() {
   installed_tools=$(cargo install --list | grep ':$' | cut -f 1 -d ' ')
   for tool in "$@"; do
@@ -27,4 +34,5 @@ install_cargo_tools() {
 
 install_rustup
 install_rust_nightly
+install_rustup_nightly_components miri-x86_64-unknown-linux-gnu
 install_cargo_tools cargo-edit cargo-make

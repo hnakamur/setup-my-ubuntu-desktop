@@ -19,10 +19,10 @@ install_rust_nightly() {
 }
 
 install_rustup_nightly_components() {
-  installed=$(rustup component list --installed)
+  installed=$(rustup +nightly component list --installed)
   for comp in "$@"; do
-    echo "$installed" | grep -qxF "$comp" || echo "$comp"
-  done | xargs -r -n 1 rustup component add
+    echo "$installed" | grep -qxF "$comp-x86_64-unknown-linux-gnu" || echo "$comp"
+  done | xargs -r -n 1 rustup +nightly component add
 }
 
 install_cargo_tools() {
@@ -34,5 +34,8 @@ install_cargo_tools() {
 
 install_rustup
 install_rust_nightly
-install_rustup_nightly_components miri-x86_64-unknown-linux-gnu
 install_cargo_tools cargo-edit cargo-make
+
+# If this fails, install miri manually.
+# See https://github.com/rust-lang/miri#using-miri
+install_rustup_nightly_components miri

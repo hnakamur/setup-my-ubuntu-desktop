@@ -1,6 +1,14 @@
 #!/bin/bash
 set -eu
 
+install_deb_packages() {
+  for pkg in "$@"; do
+    if [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" != 'install ok installed' ]; then
+      echo $pkg
+    fi
+  done | xargs -r sudo apt-get install -y
+}
+
 install_rustup() {
   rustup_path="$HOME/.cargo/bin/rustup"
   if [ ! -f "$rustup_path" ]; then
@@ -32,6 +40,7 @@ install_cargo_tools() {
   done | xargs -r -n 1 cargo install
 }
 
+install_deb_packages build-essential libssl-dev
 install_rustup
 install_rust_nightly
 install_cargo_tools cargo-edit cargo-make

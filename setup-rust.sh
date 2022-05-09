@@ -40,7 +40,7 @@ install_cargo_tools() {
   done | xargs -r -n 1 cargo install
 }
 
-install_deb_packages build-essential libssl-dev
+install_deb_packages build-essential libssl-dev pkg-config
 install_rustup
 install_rust_nightly
 install_cargo_tools cargo-edit cargo-make

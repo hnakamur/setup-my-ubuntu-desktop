@@ -1,0 +1,26 @@
+#!/bin/bash
+set -eu
+if [ $# -ne 2 ]; then
+  >&2 cat <<EOF >&2
+Usage: my-apt-key-add src dest_basename
+
+Specify - for src to use stdin as input.
+EOF
+  exit 2
+fi
+
+src="$1"
+dest_basename="$2"
+dest_dir=/usr/local/share/keyrings
+dest_path="$dest_dir/$dest_basename.gpg"
+
+# See https://gihyo.jp/admin/serial/01/ubuntu-recipe/0675?page=2
+
+tmp_keyring=$(mktemp /tmp/tmp-keyring.XXXXXXXXXX.gpg)
+gpg --no-default-keyring --keyring "$tmp_keyring" --import "$src"
+
+tmp_keyring2=$(mktemp /tmp/tmp-keyring.XXXXXXXXXX.gpg)
+gpg --no-default-keyring --keyring "$tmp_keyring" --export --output "$tmp_keyring2" --yes
+
+sudo install -D --mode 0644 "$tmp_keyring2" "$dest_path"
+rm "$tmp_keyring" "$tmp_keyring2"

@@ -23,8 +23,13 @@ fi
 zls_path="$HOME/zls/zls"
 if [ ! -x "$zls_path" ]; then
   master_zig="$dest_dir/zig"
-  ghq get https://github.com/zigtools/zls
-  cd $HOME/ghq/github.com/zigtools/zls
+  if [ -d $HOME/ghq/github.com/zigtools/zls ]; then
+    cd $HOME/ghq/github.com/zigtools/zls
+    hub sync
+  else
+    ghq get https://github.com/zigtools/zls
+    cd $HOME/ghq/github.com/zigtools/zls
+  fi
   "$master_zig" build -Drelease-safe
 
   zls_dir=$(dirname "$zls_path")

@@ -20,20 +20,13 @@ key_path="$key_dir/$key_basename.gpg"
 apt_list_path="/etc/apt/sources.list.d/$user-ubuntu-$repo-$distribution.list"
 
 if [ ! -f "$key_path" ]; then
-  # make sure commands are installed
-  type curl gpg install > /dev/null
+  echo curl gpg \
+    | xargs -d ' ' -n 1 -I {} sh -c '[ "$(2>/dev/null dpkg-query -f \${Status} -W {})" != "install ok installed" ] && echo {}' \
+    | xargs -r sudo apt-get install -y
 
-  key_fingerprint=$(curl -sS "https://launchpad.net/~$user/+archive/ubuntu/$repo" | grep -A 1 -F '<dt>Fingerprint:</dt>' | tail -1 | sed 's| *</*dd>||g')
-  gpg_key_url="https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key_fingerprint"
-
-  tmp_keyring=$(mktemp /tmp/tmp-keyring.XXXXXXXXXX.gpg)
-  curl -sS "$gpg_key_url" | gpg --no-default-keyring --keyring "$tmp_keyring" --import -
-  
-  tmp_keyring2=$(mktemp /tmp/tmp-keyring.XXXXXXXXXX.gpg)
-  gpg --no-default-keyring --keyring "$tmp_keyring" --export --output "$tmp_keyring2" --yes
-  
-  sudo install -D --mode 0644 "$tmp_keyring2" "$key_path"
-  rm "$tmp_keyring" "$tmp_keyring2"
+  sudo mkdir -p $(dirname "$key_path")
+  key_fingerprint=$(curl -sS "https://launchpad.net/~$user/+archive/ubuntu/$repo" | sed -n '/<dt>Fingerprint:<\/dt>/{n;s/.*<dd>//;s|</dd>||;p}')
+  curl -sS "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key_fingerprint" | sudo gpg --dearmor -o "$key_path"
 fi
 
 if [ ! -f "$apt_list_path" ]; then

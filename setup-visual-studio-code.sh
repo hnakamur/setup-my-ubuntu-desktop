@@ -3,8 +3,6 @@ set -eu
 
 extensions="
   golang.go
-  tiehuis.zig
-  AugusteRame.zls-vscode
   matklad.rust-analyzer
   tamasfe.even-better-toml
 "
@@ -30,10 +28,7 @@ install_apt_key() {
   key_url="$1"
   key_path="$2"
   if [ ! -f "$key_path" ]; then
-    key_temp_filename=$(mktemp)
-    curl -sS "$key_url" | gpg --dearmor > "$key_temp_filename"
-    sudo install -o root -g root -m 644 "$key_temp_filename" "$key_path"
-    rm -f "$key_temp_filename"
+    sudo curl -sS -o "$key_path" "$key_url"
   fi
 }
 
@@ -53,21 +48,12 @@ jq_replace_file() {
   rm -f "$tmpfile"
 }
 
-key_path=/etc/apt/trusted.gpg.d/packages.microsoft.gpg
+key_path=/etc/apt/keyrings/packages.microsoft.asc
 
-install_deb_packages curl gpg apt-transport-https
+install_deb_packages curl apt-transport-https
 install_apt_key https://packages.microsoft.com/keys/microsoft.asc "$key_path"
-add_apt_list "deb [arch=amd64,arm64,armhf signed-by=$key_path] https://packages.microsoft.com/repos/code stable main" /etc/apt/sources.list.d/vscode.list
+add_apt_list "deb [arch=$(dpkg --print-architecture) signed-by=$key_path] https://packages.microsoft.com/repos/code stable main" /etc/apt/sources.list.d/vscode.list
 install_deb_packages code
 install_extensions $extensions
 
 #uninstall_extensions $extensions
-
-zls_path="$HOME/zls/zls"
-
-user_config_path="$HOME/.config/Code/User/settings.json"
-[ -f "$user_config_path" ] || echo '{}' > "$user_config_path"
-jq_replace_file '."zigLanguageClient.path" |= "'"$zls_path"'" |
-  setpath(["[zig]", "editor.defaultFormatter"]; "tiehuis.zig") |
-  ."zig.buildOnSave" |= true
-  ' "$user_config_path"

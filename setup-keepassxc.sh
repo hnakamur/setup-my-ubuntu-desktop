@@ -1,49 +1,36 @@
 #!/bin/bash
 set -eu
 
-repo_url=https://github.com/keepassxreboot/keepassxc
+apt_key_file=/etc/apt/keyrings/keepassxc.asc
+apt_source_file=/etc/apt/sources.list.d/keepassxc.list
+distrib=$(lsb_release -is | tr A-Z a-z)
 
-if [ "$(dpkg-query -f '${Status}' -W libfuse2 2>/dev/null)" != 'install ok installed' ]; then
-  sudo apt install -y fuse libfuse2
-  sudo modprobe fuse
-  getent group fuse || sudo groupadd fuse
-  sudo usermod -a -G fuse "$USER"
-fi
+install_deb_packages() {
+  for pkg in "$@"; do
+    if [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" != 'install ok installed' ]; then
+      echo $pkg
+    fi
+  done | xargs -r sudo apt-get install -y
+}
 
-[ "$(dpkg-query -f '${Status}' -W curl 2>/dev/null)" == 'install ok installed' ] || sudo apt install -y curl
+install_docker_apt_key() {
+  if [ ! -f "$apt_key_file" ]; then
+    sudo curl -fsSL -o "$apt_key_file" "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xd89c66d0e31fea2874ebd20561922ab60068fcd6"
+  fi
+}
 
-version=$(curl -sS -w '%{redirect_url}' -o /dev/null "$repo_url/releases/latest" | sed 's|.*/tag/||')
+add_apt_sources() {
+  if [ ! -f "$apt_source_file" ]; then
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=$apt_key_file] \
+      https://ppa.launchpadcontent.net/phoerious/keepassxc/$distrib \
+      $(lsb_release -cs) main" \
+      | sudo tee "$apt_source_file" > /dev/null
+    sudo apt-get update
+  fi
+}
 
-app_path="$HOME/AppImage/KeePassXC-${version}-x86_64.AppImage"
-if [ -x "$app_path" ]; then
-  echo KeePassXC latest version $version is already installed.
-else
-  mkdir -p $(dirname "$app_path")
-  app_filename=$(basename "$app_path")
-  curl -Lo "$app_path" ${repo_url}/releases/download/${version}/${app_filename}
-  chmod +x "$app_path"
-  echo "Downloaded KeePassXC latest version ($version)".
-fi
-
-icon_path="$HOME/.icons/keepassxc-logo.svg"
-if [ ! -f "$icon_path" ]; then
-  mkdir -p $(dirname "$icon_path")
-  curl -L -o "$icon_path" https://keepassxc.org/images/keepassxc-logo.svg
-fi
-
-desktop_path=$HOME/.local/share/applications/keepassxc.desktop
-if ! grep -q "^Exec=$HOME/AppImage/KeePassXC-${version}-x86_64.AppImage$" "$desktop_path"; then
-  mkdir -p $(dirname "$desktop_path")
-  cat > "$desktop_path" <<EOF
-#!/usr/bin/env xdg-open
-[Desktop Entry]
-Version=1.0
-Type=Application
-Terminal=false
-Exec=$HOME/AppImage/KeePassXC-${version}-x86_64.AppImage
-Name=KeepassXC
-Comment=Cross-Platform Password Manager
-Icon=keepassxc-logo
-EOF
-  echo Created or updated desktop file for KeePassXC.
-fi
+install_deb_packages curl
+install_docker_apt_key
+add_apt_sources
+install_deb_packages keepassxc

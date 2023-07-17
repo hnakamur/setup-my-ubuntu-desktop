@@ -11,9 +11,8 @@ install_deb_packages() {
   done | xargs -r sudo apt-get install -y
 }
 
-install_deb_packages git
-
-version=$(git ls-remote --tags --refs --sort=committerdate "$repo_url" | tail -1 | sed 's|.*tags/||')
+install_deb_packages curl
+version=$(curl -sS -w '%{redirect_url}' -o /dev/null "$repo_url/releases/latest" | sed 's|.*/tag/||')
 installed_version=$(dpkg-query -f '${Version}' -W keepassxc 2>/dev/null || :)
 if [ "$installed_version" != "$version" ]; then
   mkdir -p ~/.local/bin

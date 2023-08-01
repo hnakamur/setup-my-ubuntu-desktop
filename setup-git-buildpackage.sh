@@ -26,12 +26,13 @@ fi
 EOF
 fi
 
-if [ ! -x ~/bin/gpg-passphrase ]; then
-  cat > ~/bin/gpg-passphrase <<'EOF'
+if [ ! -x ~/.local/bin/gpg-passphrase ]; then
+  mkdir -p ~/.local/bin
+  cat > ~/.local/bin/gpg-passphrase <<'EOF'
 #!/bin/sh
 exec <$HOME/.gpg-passphrase /usr/bin/gpg --batch --pinentry-mode loopback --passphrase-fd 0 "$@"
 EOF
-  chmod +x ~/bin/gpg-passphrase
+  chmod +x ~/.local/bin/gpg-passphrase
 fi
 
 if [ ! -f ~/.gpg-passphrase ]; then

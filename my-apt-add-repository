@@ -13,7 +13,7 @@ repo=${user_and_repo#*/}
 
 distribution=$(lsb_release -cs)
 
-key_dir=/usr/local/share/keyrings
+key_dir=/etc/apt/keyrings
 key_basename="$user-ubuntu-$repo-$distribution"
 key_path="$key_dir/$key_basename.key"
 
@@ -29,8 +29,8 @@ fi
 
 if [ ! -f "$apt_list_path" ]; then
   cat <<EOF | sudo tee "$apt_list_path" > /dev/null
-deb [signed-by=$key_path] https://ppa.launchpadcontent.net/$user/$repo/ubuntu/ $distribution main
-deb-src [signed-by=$key_path] https://ppa.launchpadcontent.net/$user/$repo/ubuntu/ $distribution main
+deb [arch=$(dpkg --print-architecture) signed-by=$key_path] https://ppa.launchpadcontent.net/$user/$repo/ubuntu/ $distribution main
+deb-src [arch=$(dpkg --print-architecture) signed-by=$key_path] https://ppa.launchpadcontent.net/$user/$repo/ubuntu/ $distribution main
 EOF
   sudo apt-get update
 fi

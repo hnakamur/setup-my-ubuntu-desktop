@@ -14,10 +14,10 @@ networks:
   project: default
 storage_pools:
 - config:
-    source: rpool/lxd
+    source: /var/snap/lxd/common/lxd/storage-pools/default
   description: ""
   name: default
-  driver: zfs
+  driver: btrfs
 profiles:
 - config: {}
   description: ""

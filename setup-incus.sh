@@ -18,11 +18,11 @@ if ! type incus 2>/dev/null; then
     sudo curl -sSo /etc/apt/keyrings/zabbly.asc https://pkgs.zabbly.com/key.asc
   fi
 
-  if [ ! -f /etc/apt/sources.list.d/zabbly-incus-daily.sources ]; then
-    cat <<EOF | sudo tee /etc/apt/sources.list.d/zabbly-incus-daily.sources > /dev/null
+  if [ ! -f /etc/apt/sources.list.d/zabbly-incus-stable.sources ]; then
+    cat <<EOF | sudo tee /etc/apt/sources.list.d/zabbly-incus-stable.sources > /dev/null
 Enabled: yes
 Types: deb
-URIs: https://pkgs.zabbly.com/incus/daily
+URIs: https://pkgs.zabbly.com/incus/stable
 Suites: $(lsb_release -cs)
 Components: main
 Architectures: $(dpkg --print-architecture)

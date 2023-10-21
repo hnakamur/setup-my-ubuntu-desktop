@@ -15,16 +15,16 @@ distribution=$(lsb_release -cs)
 
 key_dir=/etc/apt/keyrings
 key_basename="$user-ubuntu-$repo-$distribution"
-key_path="$key_dir/$key_basename.key"
+key_path="$key_dir/$key_basename.asc"
 
-apt_list_path="/etc/apt/sources.list.d/$user-ubuntu-$repo-$distribution.list"
+apt_list_path="/etc/apt/sources.list.d/ppa-$user-$repo-$distribution.list"
 
 if [ ! -f "$key_path" ]; then
   [ "$(2>/dev/null dpkg-query -f \${Status} -W curl)" != "install ok installed" ] && sudo apt-get install -y curl
 
   sudo mkdir -p $(dirname "$key_path")
   key_fingerprint=$(curl -sS "https://launchpad.net/~$user/+archive/ubuntu/$repo" | sed -n '/<dt>Fingerprint:<\/dt>/{n;s/.*<dd>//;s|</dd>||;p}')
-  curl -sS -o "$key_path" "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key_fingerprint"
+  sudo curl -sS -o "$key_path" "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x$key_fingerprint"
 fi
 
 if [ ! -f "$apt_list_path" ]; then

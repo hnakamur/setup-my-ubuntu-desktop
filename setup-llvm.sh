@@ -1,7 +1,7 @@
 #!/bin/bash
 # See https://apt.llvm.org/
-
-major_version=17
+# stable branch
+major_version=16
 
 install_deb_packages() {
   for pkg in "$@"; do
@@ -13,10 +13,10 @@ install_deb_packages() {
 
 install_deb_packages curl lsb-release
 
-apt_key_path=/etc/apt/keyrings/llvm-snapshot.gpg.key
+apt_key_path=/etc/apt/keyrings/apt.llvm.org.asc
 if [ ! -f "$apt_key_path" ]; then
   sudo mkdir -p $(dirname "$apt_key_path")
-  curl -sS -o "$apt_key_path" https://apt.llvm.org/llvm-snapshot.gpg.key
+  sudo curl -sS -o "$apt_key_path" https://apt.llvm.org/llvm-snapshot.gpg.key
 fi
 
 apt_list_path=/etc/apt/sources.list.d/llvm-${major_version}.list
@@ -30,16 +30,14 @@ EOF
   sudo apt-get update
 fi
 
-install_deb_packages curl lsb-release
-
 # LLVM
 install_deb_packages libllvm-${major_version}-ocaml-dev libllvm${major_version} llvm-${major_version} llvm-${major_version}-dev llvm-${major_version}-doc llvm-${major_version}-examples llvm-${major_version}-runtime
 # Clang and co
 install_deb_packages clang-${major_version} clang-tools-${major_version} clang-${major_version}-doc libclang-common-${major_version}-dev libclang-${major_version}-dev libclang1-${major_version} clang-format-${major_version} python3-clang-${major_version} clangd-${major_version} clang-tidy-${major_version}
 # compiler-rt
 install_deb_packages libclang-rt-${major_version}-dev
-# polly
-install_deb_packages libpolly-${major_version}-dev
+# # polly
+# install_deb_packages libpolly-${major_version}-dev
 # libfuzzer
 install_deb_packages libfuzzer-${major_version}-dev
 # lldb
@@ -48,17 +46,17 @@ install_deb_packages lldb-${major_version}
 install_deb_packages lld-${major_version}
 # libc++
 install_deb_packages libc++-${major_version}-dev libc++abi-${major_version}-dev
-# OpenMP
-install_deb_packages libomp-${major_version}-dev
-# libclc
-install_deb_packages libclc-${major_version}-dev
+# # OpenMP
+# install_deb_packages libomp-${major_version}-dev
+# # libclc
+# install_deb_packages libclc-${major_version}-dev
 # libunwind
 install_deb_packages libunwind-${major_version}-dev
-# mlir
-install_deb_packages libmlir-${major_version}-dev mlir-${major_version}-tools
-# bolt
-install_deb_packages libbolt-${major_version}-dev bolt-${major_version}
-# flang
-install_deb_packages flang-${major_version}
+# # mlir
+# install_deb_packages libmlir-${major_version}-dev mlir-${major_version}-tools
+# # bolt
+# install_deb_packages libbolt-${major_version}-dev bolt-${major_version}
+# # flang
+# install_deb_packages flang-${major_version}
 # wasm support
 install_deb_packages libclang-rt-${major_version}-dev-wasm32 libclang-rt-${major_version}-dev-wasm64 libc++-${major_version}-dev-wasm32 libc++abi-${major_version}-dev-wasm32 libclang-rt-${major_version}-dev-wasm32 libclang-rt-${major_version}-dev-wasm64 

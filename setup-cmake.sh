@@ -11,9 +11,10 @@ install_deb_packages() {
   done | xargs -r sudo apt-get install -y
 }
 
+install_deb_packages curl cmake-format
+
 installed_version=$(cmake --version 2>/dev/null | head -1 | cut -d ' ' -f 3)
 if [ "$installed_version" != "$CMAKE_VERSION" ]; then
-  install_deb_packages curl
   download_url=https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz
   curl -sSL "$download_url" | sudo tar zxf - -C /usr/local/
   (cd /usr/local/bin; sudo ln -s ../cmake-${CMAKE_VERSION}-linux-x86_64/bin/* .)

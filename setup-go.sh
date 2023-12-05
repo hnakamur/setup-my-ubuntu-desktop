@@ -15,13 +15,28 @@ installed_version=$(go version 2>/dev/null | cut -d ' ' -f 3 || :)
 if [ "$installed_version" != "$latest_version" ]; then
   filename=$(echo "$versions_json" | jq -r '.[0].files|map(select(.os=="linux" and .arch=="amd64"))[0].filename')
   tarball_url="https://go.dev/dl/$filename"
-  local_path="/tmp/$filename"
-  curl -L -o "$local_path" "$tarball_url"
-  sudo rm -rf /usr/local/go
-  sudo tar -zxf "$local_path" -C /usr/local/
+  if [ "$1" == "--user" ]; then
+    rm -rf $HOME/.local/go
+    curl -L "$tarball_url" | tar -zx -C $HOME/.local
+  
+    if ! grep -q -F $HOME/.local/go $HOME/.profile; then
+      cat >> $HOME/.profile <<'EOF'
 
-  if ! grep -q -F /usr/local/go $HOME/.profile; then
-    cat >> $HOME/.profile <<'EOF'
+if [ -d "$HOME/.local/go/bin" ] ; then
+    PATH="$HOME/.local/go/bin:$PATH"
+fi
+
+if [ -d "$HOME/go/bin" ] ; then
+    PATH="$HOME/go/bin:$PATH"
+fi
+EOF
+    fi
+  else
+    sudo rm -rf /usr/local/go
+    curl -L "$tarball_url" | sudo tar -zx -C /usr/local
+  
+    if ! grep -q -F /usr/local/go $HOME/.profile; then
+      cat >> $HOME/.profile <<'EOF'
 
 if [ -d "/usr/local/go/bin" ] ; then
     PATH="/usr/local/go/bin:$PATH"
@@ -31,6 +46,7 @@ if [ -d "$HOME/go/bin" ] ; then
     PATH="$HOME/go/bin:$PATH"
 fi
 EOF
+    fi
   fi
 fi
 

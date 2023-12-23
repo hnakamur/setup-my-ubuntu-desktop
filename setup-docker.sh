@@ -1,9 +1,6 @@
 #!/bin/bash
 set -eu
 
-apt_key_file=/etc/apt/keyrings/docker.asc
-distrib=$(lsb_release -is | tr A-Z a-z)
-
 install_deb_packages() {
   for pkg in "$@"; do
     if [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" != 'install ok installed' ]; then
@@ -11,6 +8,10 @@ install_deb_packages() {
     fi
   done | xargs -r sudo apt-get install -y
 }
+
+apt_key_file=/etc/apt/keyrings/docker.asc
+install_deb_packages ca-certificates curl lsb-release
+distrib=$(lsb_release -is | tr A-Z a-z)
 
 install_docker_apt_key() {
   if [ ! -f "$apt_key_file" ]; then
@@ -38,7 +39,6 @@ add_user_to_docker_group() {
 }
 
 
-install_deb_packages ca-certificates curl lsb-release
 install_docker_apt_key
 add_apt_sources
 install_deb_packages docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin

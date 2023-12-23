@@ -1,3 +1,3 @@
 #!/bin/bash
-sudo apt install -y fcitx5-mozc
-im-config -n fcitx5
+sudo apt install -y ibus-mozc
+im-config -n ibus

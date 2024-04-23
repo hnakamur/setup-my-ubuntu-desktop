@@ -11,4 +11,4 @@ install_deb_packages() {
 }
 
 install_deb_packages procps util-linux sysstat iproute2 numactl tcpdump linux-tools-common linux-tools-$(uname -r) \
-  bpfcc-tools bpftrace trace-cmd nicstat ethtool tiptop cpuid msr-tools
+  bpfcc-tools bpftrace trace-cmd nicstat ethtool tiptop cpuid msr-tools perf-tools-unstable

@@ -9,7 +9,7 @@ install_deb_packages() {
   done | xargs -r sudo apt-get install -y
 }
 
-// See https://askubuntu.com/a/1209777/707184
+# See https://askubuntu.com/a/1209777/707184
 install_tips_txt() {
   dest=/usr/share/doc/perf-tip/tips.txt
   url=https://raw.githubusercontent.com/torvalds/linux/master/tools/perf/Documentation/tips.txt

@@ -9,12 +9,11 @@ install_deb_packages() {
   done | xargs -r sudo apt-get install -y
 }
 
-install_deb_packages curl unzip
+install_deb_packages curl
 
 if ! type zigup >& /dev/null; then
-  zip_url=https://github.com/marler8997/zigup/releases/latest/download/zigup.ubuntu-latest-x86_64.zip
-  curl -sSLo /tmp/zigup.ubuntu-latest-x86_64.zip "$zip_url"
-  mkdir -p "$HOME/.local/bin"
-  unzip -q /tmp/zigup.ubuntu-latest-x86_64.zip zigup -d "$HOME/.local/bin"
-  chmod +x "$HOME/.local/bin/zigup"
+  tarball_url=https://github.com/marler8997/zigup/releases/latest/download/zigup-x86_64-linux.tar.gz
+  install_dir="$HOME/.local/bin"
+  mkdir -p "$install_dir"
+  curl -sSL "$tarball_url" | tar zxf - -C "$install_dir"
 fi

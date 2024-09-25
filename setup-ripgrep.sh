@@ -2,7 +2,7 @@
 set -eu
 
 repo_url=https://github.com/BurntSushi/ripgrep
-version=14.1.0
+version=14.1.1
 release=1
 
 install_deb_packages() {

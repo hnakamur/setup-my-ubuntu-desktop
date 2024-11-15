@@ -17,18 +17,17 @@ fi
 
 if ! type incus 2>/dev/null; then
   codename=$(lsb_release -cs)
-  if [ "$codename" != noble ]; then
-    # https://github.com/zabbly/incus
+  # https://github.com/zabbly/incus
 
-    if [ ! -f /etc/apt/keyrings/zabbly.asc ]; then
-      install_deb_packages curl
+  if [ ! -f /etc/apt/keyrings/zabbly.asc ]; then
+    install_deb_packages curl
 
-      sudo mkdir -p /etc/apt/keyrings
-      sudo curl -sSo /etc/apt/keyrings/zabbly.asc https://pkgs.zabbly.com/key.asc
-    fi
+    sudo mkdir -p /etc/apt/keyrings
+    sudo curl -sSo /etc/apt/keyrings/zabbly.asc https://pkgs.zabbly.com/key.asc
+  fi
 
-    if [ ! -f /etc/apt/sources.list.d/zabbly-incus-stable.sources ]; then
-      cat <<EOF | sudo tee /etc/apt/sources.list.d/zabbly-incus-stable.sources > /dev/null
+  if [ ! -f /etc/apt/sources.list.d/zabbly-incus-stable.sources ]; then
+    cat <<EOF | sudo tee /etc/apt/sources.list.d/zabbly-incus-stable.sources > /dev/null
 Enabled: yes
 Types: deb
 URIs: https://pkgs.zabbly.com/incus/stable
@@ -37,9 +36,8 @@ Components: main
 Architectures: $(dpkg --print-architecture)
 Signed-By: /etc/apt/keyrings/zabbly.asc
 EOF
-    fi
-    sudo apt-get update
   fi
+  sudo apt-get update
 
   install_deb_packages incus
 fi

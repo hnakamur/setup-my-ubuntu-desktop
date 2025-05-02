@@ -1,0 +1,230 @@
+#!/usr/bin/env python3
+import argparse
+import asyncio
+import io
+import json
+import logging
+import shutil
+import sys
+from typing import TypedDict
+
+
+class SubjectAlternativeName(TypedDict):
+    type: str
+    value: str
+
+
+class CertInfo(TypedDict):
+    notBefore: str
+    notAfter: str
+    subject: str
+    subjectHash: str
+    san: list[SubjectAlternativeName]
+    issuer: str
+    issuerHash: str
+
+
+def parse_san_term(term: str) -> SubjectAlternativeName:
+    type, _, value = term.strip().partition(":")
+    return {"type": type, "value": value}
+
+
+def parse_san(san: str) -> list[SubjectAlternativeName]:
+    return [parse_san_term(term) for term in san.split(",")]
+
+
+async def extract_info_from_openssl_x509_output_stream(
+    stream: asyncio.StreamReader,
+) -> CertInfo:
+    info = {}
+    seenSubject = False
+    seenSanTitle = False
+    seenIssuer = False
+    while True:
+        line = await stream.readline()
+        if not line:
+            break
+        line = line.decode().strip()
+        if line.startswith("notBefore="):
+            info["notBefore"] = line.partition("=")[2]
+        elif line.startswith("notAfter="):
+            info["notAfter"] = line.partition("=")[2]
+        elif line.startswith("subject="):
+            info["subject"] = line.partition("=")[2]
+            seenSubject = True
+        elif seenSubject:
+            seenSubject = False
+            info["subjectHash"] = line
+        elif line == "X509v3 Subject Alternative Name:":
+            seenSanTitle = True
+        elif seenSanTitle:
+            seenSanTitle = False
+            info["san"] = parse_san(line.strip())
+        elif line.startswith("issuer="):
+            info["issuer"] = line.partition("=")[2]
+            seenIssuer = True
+        elif seenIssuer:
+            seenIssuer = False
+            info["issuerHash"] = line
+    return info
+
+
+def check_command_exists(cmd: str):
+    if shutil.which(cmd) is None:
+        logging.critical(f"Please install command {cmd} in PATH.")
+        sys.exit(1)
+
+
+async def read_multi_certs_in_stream(stream: asyncio.StreamReader) -> list[str]:
+    certs = []
+    buffer = io.StringIO()
+    inCert = False
+    while True:
+        line = await stream.readline()
+        if not line:
+            break
+        line = line.decode()
+        if inCert:
+            buffer.write(line)
+            if line.strip() == "-----END CERTIFICATE-----":
+                cert = buffer.getvalue().strip()
+                certs.append(cert)
+                buffer.close()
+                buffer = io.StringIO()
+                inCert = False
+        elif line.strip() == "-----BEGIN CERTIFICATE-----":
+            buffer.write(line)
+            inCert = True
+    return certs
+
+
+def sync_read_multi_certs_in_stream(stream: io.TextIOBase) -> list[str]:
+    certs = []
+    buffer = io.StringIO()
+    inCert = False
+    while True:
+        line = stream.readline()
+        if not line:
+            break
+        if inCert:
+            buffer.write(line)
+            if line.strip() == "-----END CERTIFICATE-----":
+                cert = buffer.getvalue().strip()
+                certs.append(cert)
+                buffer.close()
+                buffer = io.StringIO()
+                inCert = False
+        elif line.strip() == "-----BEGIN CERTIFICATE-----":
+            buffer.write(line)
+            inCert = True
+    return certs
+
+
+def sync_read_multi_certs_in_file(path: str) -> list[str]:
+    with open(path, "r") as f:
+        return sync_read_multi_certs_in_stream(f)
+
+
+async def read_command_output_or_err_stream(stream: asyncio.StreamReader) -> str:
+    buffer = io.StringIO()
+    while True:
+        line = await stream.readline()
+        if not line:
+            break
+        buffer.write(line.decode())
+    output = buffer.getvalue()
+    buffer.close()
+    return output
+
+
+async def get_certs_from_remote_server(addr: str) -> list[str]:
+    if addr.rfind(":") == -1:
+        addr = f"{addr}:443"
+    cmd = f"openssl s_client -connect {addr} -showcerts"
+    proc = await asyncio.create_subprocess_shell(
+        cmd,
+        stdin=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+
+    proc.stdin.write("Q\n".encode())
+    proc.stdin.close()
+
+    certs, stderr = await asyncio.gather(
+        read_multi_certs_in_stream(proc.stdout),
+        read_command_output_or_err_stream(proc.stderr),
+    )
+    await proc.wait()
+
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"openssl s_client failed with returncode={proc.returncode}, stderr={stderr.strip()}"
+        )
+    return certs
+
+
+async def extract_info_from_cert(cert: str) -> CertInfo:
+    cmd = "openssl x509 -dates -subject -subject_hash -ext subjectAltName -issuer -issuer_hash -noout"
+    proc = await asyncio.create_subprocess_shell(
+        cmd,
+        stdin=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+
+    proc.stdin.write(cert.encode())
+    proc.stdin.close()
+
+    info, stderr = await asyncio.gather(
+        extract_info_from_openssl_x509_output_stream(proc.stdout),
+        read_command_output_or_err_stream(proc.stderr),
+    )
+    await proc.wait()
+
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"openssl x509 failed with returncode={proc.returncode}, stderr={stderr.strip()}"
+        )
+    return info
+
+
+async def extract_info_from_certs(certs: list[str]) -> list[CertInfo]:
+    return [await extract_info_from_cert(cert) for cert in certs]
+
+
+async def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s.%(msecs)03d %(levelname)s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    for cmd in ["openssl"]:
+        check_command_exists(cmd)
+
+    parser = argparse.ArgumentParser(
+        prog="show-cert-info",
+        description="Show information in certificate file at local or at a remote server",
+    )
+
+    parser.add_argument("--file", help="path to local certificate file")
+    parser.add_argument("--server", help="remote server hostname or hostname:port")
+
+    args = parser.parse_args()
+    if (args.file is not None and args.server is not None) or (
+        args.file is None and args.server is None
+    ):
+        logging.critical("Please set one of --file or --server")
+        sys.exit(1)
+
+    certs = None
+    if args.file is not None:
+        certs = sync_read_multi_certs_in_file(args.file)
+    elif args.server is not None:
+        certs = await get_certs_from_remote_server(args.server)
+    cert_info_list = await extract_info_from_certs(certs)
+    print(json.dumps(cert_info_list, indent=2))
+
+
+asyncio.run(main())

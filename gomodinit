@@ -1,0 +1,4 @@
+#!/bin/bash
+set -eu
+go mod init "$@"
+go mod tidy -go=$(curl -sSL 'https://go.dev/dl/?mode=json' | jq -r '.[1].version | sub("^go"; "") | sub("\\.[^.]+$"; ".0")')

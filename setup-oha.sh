@@ -5,6 +5,7 @@ dest_path="$HOME/.local/bin/oha"
 if [ ! -x "$dest_path" ]; then
   version=$(curl -sS -w '%{redirect_url}' -o /dev/null "$repo_url/releases/latest" | sed 's|.*/tag/||')
   mkdir -p $(dirname "$dest_path")
-  curl -sSLo "$dest_path" ${repo_url}/releases/download/${version}/oha-linux-amd64-pgo
+  arch=$(dpkg --print-architecture)
+  curl -sSLo "$dest_path" ${repo_url}/releases/download/${version}/oha-linux-${arch}
   chmod +x "$dest_path"
 fi

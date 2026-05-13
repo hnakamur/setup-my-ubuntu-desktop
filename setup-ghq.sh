@@ -17,8 +17,9 @@ version=$(curl -sS -w '%{redirect_url}' -o /dev/null "$repo_url/releases/latest"
 installed_version=$(ghq -version 2>/dev/null | cut -d ' ' -f 3)
 if [ "v$installed_version" != "$version" ]; then
   bin_dir=$HOME/.local/bin
-  zip_path=/tmp/ghq_linux_amd64.zip
+  arch=$(dpkg --print-architecture)
+  zip_path=/tmp/ghq_linux_${arch}.zip
   mkdir -p "$bin_dir"
-  curl -L -o ${zip_path} ${repo_url}/releases/download/${version}/ghq_linux_amd64.zip
-  unzip -j ${zip_path} ghq_linux_amd64/ghq -d "$bin_dir"
+  curl -L -o ${zip_path} ${repo_url}/releases/download/${version}/ghq_linux_${arch}.zip
+  unzip -j ${zip_path} ghq_linux_${arch}/ghq -d "$bin_dir"
 fi

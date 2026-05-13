@@ -87,7 +87,8 @@ else
   installed_version=$(/usr/local/go/bin/go version 2>/dev/null | cut -d ' ' -f 3 || :)
 fi
 if [ "$installed_version" != "$latest_version" ]; then
-  filename=$(echo "$versions_json" | jq -r '.[0].files|map(select(.os=="linux" and .arch=="amd64"))[0].filename')
+  arch=$(dpkg --print-architecture)
+  filename=$(echo "$versions_json" | jq -r '.[0].files|map(select(.os=="linux" and .arch=="'$arch'"))[0].filename')
   tarball_url="https://go.dev/dl/$filename"
   if [ "$user" -eq 1 ]; then
     rm -rf $HOME/.local/go

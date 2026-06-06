@@ -22,7 +22,11 @@ install_docker_apt_key() {
 add_apt_sources() {
   codename=$(lsb_release -cs)
   if [ ! -f /etc/apt/sources.list.d/docker.list ]; then
-    if [ "$codename" = noble ]; then
+    if [ "$codename" = jammy ]; then
+      echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=$apt_key_file] https://download.docker.com/linux/$distrib \
+        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    else
       cat <<EOF | sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null
 Enabled: yes
 Types: deb
@@ -32,10 +36,6 @@ Components: stable
 Signed-By: $apt_key_file
 Architectures: $(dpkg --print-architecture)
 EOF
-    else
-      echo \
-        "deb [arch=$(dpkg --print-architecture) signed-by=$apt_key_file] https://download.docker.com/linux/$distrib \
-        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
     fi
     sudo apt-get update
   fi

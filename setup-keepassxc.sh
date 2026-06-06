@@ -2,7 +2,6 @@
 set -eu
 
 apt_key_file=/etc/apt/keyrings/keepassxc.asc
-apt_source_file=/etc/apt/sources.list.d/keepassxc.list
 distrib=$(lsb_release -is | tr A-Z a-z)
 
 install_deb_packages() {
@@ -20,13 +19,29 @@ install_docker_apt_key() {
 }
 
 add_apt_sources() {
-  if [ ! -f "$apt_source_file" ]; then
-    echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=$apt_key_file] \
-      https://ppa.launchpadcontent.net/phoerious/keepassxc/$distrib \
-      $(lsb_release -cs) main" \
-      | sudo tee "$apt_source_file" > /dev/null
-    sudo apt-get update
+  codename=$(lsb_release -cs)
+  if [ "$codename" = jammy ]; then
+    apt_source_file=/etc/apt/sources.list.d/keepassxc.list
+    if [ ! -f "$apt_source_file" ]; then
+      echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=$apt_key_file] \
+        https://ppa.launchpadcontent.net/phoerious/keepassxc/$distrib \
+        $codename main" \
+        | sudo tee "$apt_source_file" > /dev/null
+      sudo apt-get update
+    fi
+  else
+    apt_source_file=/etc/apt/sources.list.d/keepassxc.sources
+    if [ ! -f "$apt_source_file" ]; then
+      cat <<EOF | sudo tee "$apt_source_file" > /dev/null
+Types: deb
+URIs: https://ppa.launchpadcontent.net/phoerious/keepassxc/$distrib/
+Suites: $codename
+Components: main
+Signed-By: $apt_key_file
+EOF
+      sudo apt-get update
+    fi
   fi
 }
 

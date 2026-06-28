@@ -3,19 +3,20 @@ set -eu
 
 install_deb_packages() {
   for pkg in "$@"; do
-    if [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" != 'install ok installed' ]; then
-      echo $pkg
+    if [ "$(dpkg-query -f '${Status}' -W "${pkg}" 2>/dev/null)" != 'install ok installed' ]; then
+      echo "${pkg}"
     fi
   done | xargs -r sudo apt-get install -y
 }
 
 apt_key_file=/etc/apt/keyrings/docker.asc
 install_deb_packages ca-certificates curl lsb-release
+# shellcheck disable=SC2018,SC2019
 distrib=$(lsb_release -is | tr A-Z a-z)
 
 install_docker_apt_key() {
   if [ ! -f "$apt_key_file" ]; then
-    sudo curl -fsSL -o "$apt_key_file" https://download.docker.com/linux/$distrib/gpg
+    sudo curl -fsSL -o "$apt_key_file" "https://download.docker.com/linux/${distrib}/gpg"
   fi
 }
 

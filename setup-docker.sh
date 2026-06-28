@@ -2,6 +2,7 @@
 set -eu
 
 install_deb_packages() {
+  local pkg
   for pkg in "$@"; do
     if [ "$(dpkg-query -f '${Status}' -W "${pkg}" 2>/dev/null)" != 'install ok installed' ]; then
       echo "${pkg}"
@@ -9,25 +10,21 @@ install_deb_packages() {
   done | xargs -r sudo apt-get install -y
 }
 
-apt_key_file=/etc/apt/keyrings/docker.asc
-install_deb_packages ca-certificates curl lsb-release
-# shellcheck disable=SC2018,SC2019
-distrib=$(lsb_release -is | tr A-Z a-z)
-
 install_docker_apt_key() {
+  local apt_key_file="$1"
   if [ ! -f "$apt_key_file" ]; then
+    # shellcheck disable=SC2018,SC2019
+    distrib=$(lsb_release -is | tr A-Z a-z)
     sudo curl -fsSL -o "$apt_key_file" "https://download.docker.com/linux/${distrib}/gpg"
   fi
 }
 
 add_apt_sources() {
+  local apt_key_file="$1"
   codename=$(lsb_release -cs)
-  if [ ! -f /etc/apt/sources.list.d/docker.list ]; then
-    if [ "$codename" = jammy ]; then
-      echo \
-        "deb [arch=$(dpkg --print-architecture) signed-by=$apt_key_file] https://download.docker.com/linux/$distrib \
-        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    else
+  if [ ! -f /etc/apt/sources.list.d/docker.sources ]; then
+    # shellcheck disable=SC2018,SC2019
+    distrib=$(lsb_release -is | tr A-Z a-z)
       cat <<EOF | sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null
 Enabled: yes
 Types: deb
@@ -37,7 +34,6 @@ Components: stable
 Signed-By: $apt_key_file
 Architectures: $(dpkg --print-architecture)
 EOF
-    fi
     sudo apt-get update
   fi
 }
@@ -47,14 +43,19 @@ add_docker_group() {
 }
 
 add_user_to_docker_group() {
-  user="$1"
-  group="$2"
+  local user="$1"
+  local group="$2"
   id -nGz "$user" | grep -qzxF "$group" || sudo usermod -aG "$group" "$user"
 }
 
+main() {
+  install_deb_packages ca-certificates curl lsb-release
+  apt_key_file=/etc/apt/keyrings/docker.asc
+  install_docker_apt_key "${apt_key_file}"
+  add_apt_sources "${apt_key_file}"
+  install_deb_packages docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  add_docker_group
+  add_user_to_docker_group "$USER" docker
+}
 
-install_docker_apt_key
-add_apt_sources
-install_deb_packages docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-add_docker_group
-add_user_to_docker_group "$USER" docker
+main

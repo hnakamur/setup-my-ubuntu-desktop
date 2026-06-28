@@ -49,6 +49,15 @@ add_user_to_docker_group() {
 }
 
 main() {
+  local rootless=0
+  case "${1:-}" in
+  --rootless)
+    # NOTE: I failed to run rootless docker in an Incus container.
+    # It works fine on a Ubuntu host server.
+    rootless=1
+    ;;
+  esac
+
   install_deb_packages ca-certificates curl lsb-release
   apt_key_file=/etc/apt/keyrings/docker.asc
   install_docker_apt_key "${apt_key_file}"
@@ -56,6 +65,13 @@ main() {
   install_deb_packages docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   add_docker_group
   add_user_to_docker_group "$USER" docker
+
+  if [ "${rootless}" -ne 0 ]; then
+    install_deb_packages uidmap
+    sudo systemctl disable --now docker.service docker.socket
+    sudo rm /var/run/docker.sock
+    dockerd-rootless-setuptool.sh install
+  fi
 }
 
 main

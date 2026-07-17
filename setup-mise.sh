@@ -8,9 +8,8 @@ version="${version#v}"
 bin_dir="${HOME}/.local/bin"
 installed_version="$( ("${bin_dir}/mise" version --json 2>/dev/null || :) | jq -r .version)"
 installed_version="${installed_version%%* }"
-echo installed_version=$installed_version version=$version
 if [ "$installed_version" != "$version" ]; then
-  # install just executable
+  # install executable
   case "$(uname -m)" in
   x86_64) arch=x64 ;;
   aarch64) arch=arm64 ;;

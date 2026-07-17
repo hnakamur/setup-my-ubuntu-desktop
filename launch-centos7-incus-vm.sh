@@ -4,7 +4,7 @@ set -eu
 vm_name=centos7-cloud-vm
 
 incusbr0_ipv4_addr_with_mask=$(incus network get incusbr0 ipv4.address)
-incusbr0_ipv4_addr=$(echo $incusbr0_ipv4_addr_with_mask | sed 's|/.*||')
+incusbr0_ipv4_addr=${incusbr0_ipv4_addr_with_mask%%/*}
 
 config_file=/tmp/$vm_name-cloud-init.yml
 cat > $config_file <<EOF

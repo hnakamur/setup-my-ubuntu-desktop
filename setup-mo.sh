@@ -3,8 +3,8 @@ set -eu
 
 install_deb_packages() {
   for pkg in "$@"; do
-    if [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" != 'install ok installed' ]; then
-      echo $pkg
+    if [ "$(dpkg-query -f '${Status}' -W "$pkg" 2>/dev/null)" != 'install ok installed' ]; then
+      echo "$pkg"
     fi
   done | xargs -r sudo apt-get install -y
 }
@@ -18,5 +18,5 @@ installed_version=$(mo --version 2>/dev/null | cut -d ' ' -f 3)
 if [ "$installed_version" != "$version" ]; then
   bin_dir=$HOME/.local/bin
   mkdir -p "$bin_dir"
-  curl -L ${repo_url}/releases/download/v${version}/mo_v${version}_linux_amd64.tar.gz | tar zx -C ${bin_dir} mo
+  curl -L ${repo_url}/releases/download/v"${version}"/mo_v"${version}"_linux_amd64.tar.gz | tar zx -C "${bin_dir}" mo
 fi

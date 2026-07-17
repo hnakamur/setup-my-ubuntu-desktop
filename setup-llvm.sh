@@ -5,8 +5,8 @@ major_version=16
 
 install_deb_packages() {
   for pkg in "$@"; do
-    if [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" != 'install ok installed' ]; then
-      echo $pkg
+    if [ "$(dpkg-query -f '${Status}' -W "$pkg" 2>/dev/null)" != 'install ok installed' ]; then
+      echo "$pkg"
     fi
   done | xargs -r sudo apt-get install -y
 }
@@ -15,7 +15,7 @@ install_deb_packages curl lsb-release
 
 apt_key_path=/etc/apt/keyrings/apt.llvm.org.asc
 if [ ! -f "$apt_key_path" ]; then
-  sudo mkdir -p $(dirname "$apt_key_path")
+  sudo mkdir -p "$(dirname "$apt_key_path")"
   sudo curl -sS -o "$apt_key_path" https://apt.llvm.org/llvm-snapshot.gpg.key
 fi
 

@@ -9,8 +9,8 @@ gnome_profile_name=default
 
 install_deb_packages() {
   for pkg in "$@"; do
-    if [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" != 'install ok installed' ]; then
-      echo $pkg
+    if [ "$(dpkg-query -f '${Status}' -W "$pkg" 2>/dev/null)" != 'install ok installed' ]; then
+      echo "$pkg"
     fi
   done | xargs -r sudo apt-get install -y
 }
@@ -26,7 +26,7 @@ if [ ! -f "$font_dir/PlemolJP-Regular.ttf" ]; then
   unzip "$local_zip_path" "PlemolJP_${version}/PlemolJPConsole/*.ttf" -d "$tmp_dir"
 
   install -d "$font_dir"
-  install $tmp_dir/PlemolJP_${version}/PlemolJPConsole/*.ttf "$font_dir"
+  install $tmp_dir/PlemolJP_"${version}"/PlemolJPConsole/*.ttf "$font_dir"
   fc-cache -f "$font_dir"
   rm -rf "$local_zip_path" "$tmp_dir/PlemolJP_${version}"
 fi

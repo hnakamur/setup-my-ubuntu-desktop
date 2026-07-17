@@ -36,7 +36,7 @@ EOF
 fi
 
 if [ ! -f ~/.gpg-passphrase ]; then
-  read -s -p "GPG passphrase: " passphrase
+  read -r -s -p "GPG passphrase: " passphrase
   echo "$passphrase" >> ~/.gpg-passphrase
   chmod 400 ~/.gpg-passphrase
 fi

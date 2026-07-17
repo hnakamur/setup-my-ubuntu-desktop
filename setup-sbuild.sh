@@ -8,7 +8,7 @@ set -eu
 sudo apt install -y sbuild debhelper ubuntu-dev-tools piuparts
 sudo usermod -a -G sbuild "$USER"
 
-mkdir -p $HOME/ubuntu/scratch
+mkdir -p "$HOME"/ubuntu/scratch
 if ! grep "/home/$USER/ubuntu/scratch" /etc/schroot/sbuild/fstab; then
   echo "/home/$USER/ubuntu/scratch  /scratch          none  rw,bind  0  0" | sudo tee -a /etc/schroot/sbuild/fstab
 fi
@@ -99,7 +99,7 @@ $environment_filter = [
 EOF
 fi
 
-mkdir -p $HOME/ubuntu/{build,logs}
+mkdir -p "$HOME"/ubuntu/{build,logs}
 
 if [ ! -f ~/.mk-sbuild.rc ]; then
   cat > ~/.mk-sbuild.rc <<'EOF'

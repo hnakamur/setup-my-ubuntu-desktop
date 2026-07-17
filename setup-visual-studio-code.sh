@@ -9,7 +9,7 @@ extensions="
 
 install_deb_packages() {
   for pkg in "$@"; do
-    [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" == 'install ok installed' ] || echo $pkg
+    [ "$(dpkg-query -f '${Status}' -W "$pkg" 2>/dev/null)" == 'install ok installed' ] || echo "$pkg"
   done | xargs -r sudo apt-get install -y
 }
 
@@ -42,8 +42,8 @@ add_apt_list() {
 }
 
 jq_replace_file() {
-  input_file="${@: -1}"
-  tmpfile=$(mktemp -p $(dirname "$input_file"))
+  input_file="${*: -1}"
+  tmpfile=$(mktemp -p "$(dirname "$input_file")")
   jq "$@" > "$tmpfile" && mv "$tmpfile" "$input_file"
   rm -f "$tmpfile"
 }
@@ -54,6 +54,6 @@ install_deb_packages curl apt-transport-https
 install_apt_key https://packages.microsoft.com/keys/microsoft.asc "$key_path"
 add_apt_list "deb [arch=$(dpkg --print-architecture) signed-by=$key_path] https://packages.microsoft.com/repos/code stable main" /etc/apt/sources.list.d/vscode.list
 install_deb_packages code
-install_extensions $extensions
+install_extensions "$extensions"
 
 #uninstall_extensions $extensions

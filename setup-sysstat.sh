@@ -1,8 +1,8 @@
 #!/bin/sh
 install_deb_packages() {
   for pkg in "$@"; do
-    if [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" != 'install ok installed' ]; then
-      echo $pkg
+    if [ "$(dpkg-query -f '${Status}' -W "$pkg" 2>/dev/null)" != 'install ok installed' ]; then
+      echo "$pkg"
     fi
   done | xargs -r sudo apt-get install -y
 }

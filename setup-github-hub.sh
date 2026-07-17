@@ -4,8 +4,8 @@ repo_url=https://github.com/mislav/hub
 
 install_deb_packages() {
   for pkg in "$@"; do
-    if [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" != 'install ok installed' ]; then
-      echo $pkg
+    if [ "$(dpkg-query -f '${Status}' -W "$pkg" 2>/dev/null)" != 'install ok installed' ]; then
+      echo "$pkg"
     fi
   done | xargs -r sudo apt-get install -y
 }
@@ -16,6 +16,6 @@ installed_version=$(hub --version 2>/dev/null | sed -n '/^hub version/s/^hub ver
 if [ "$installed_version" != "$version" ]; then
   mkdir -p ~/.local/bin
   arch=$(dpkg --print-architecture)
-  curl -fsSL ${repo_url}/releases/download/v${version}/hub-linux-${arch}-${version}.tgz | tar -C ~/.local/bin/ --strip-components=2 -zxf - hub-linux-${arch}-${version}/bin/hub 
+  curl -fsSL "${repo_url}/releases/download/v${version}/hub-linux-${arch}-${version}.tgz" | tar -C ~/.local/bin/ --strip-components=2 -zxf - "hub-linux-${arch}-${version}/bin/hub"
 fi
 

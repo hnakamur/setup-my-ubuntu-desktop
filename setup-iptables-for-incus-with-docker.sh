@@ -17,6 +17,6 @@ EOF
   sudo systemctl daemon-reload
 fi
 
-if [ $(systemctl is-enabled iptables-for-incus-with-docker) != enabled ]; then
+if [ "$(systemctl is-enabled iptables-for-incus-with-docker)" != enabled ]; then
   sudo systemctl enable --now iptables-for-incus-with-docker
 fi

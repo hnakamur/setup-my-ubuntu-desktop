@@ -3,7 +3,7 @@ set -eu
 
 install_deb_packages() {
   for pkg in "$@"; do
-    [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" == 'install ok installed' ] || echo $pkg
+    [ "$(dpkg-query -f '${Status}' -W "$pkg" 2>/dev/null)" == 'install ok installed' ] || echo "$pkg"
   done | xargs -r sudo apt-get install -y
 }
 

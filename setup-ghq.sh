@@ -3,8 +3,8 @@ set -eu
 
 install_deb_packages() {
   for pkg in "$@"; do
-    if [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" != 'install ok installed' ]; then
-      echo $pkg
+    if [ "$(dpkg-query -f '${Status}' -W "$pkg" 2>/dev/null)" != 'install ok installed' ]; then
+      echo "$pkg"
     fi
   done | xargs -r sudo apt-get install -y
 }
@@ -20,6 +20,6 @@ if [ "v$installed_version" != "$version" ]; then
   arch=$(dpkg --print-architecture)
   zip_path=/tmp/ghq_linux_${arch}.zip
   mkdir -p "$bin_dir"
-  curl -L -o ${zip_path} ${repo_url}/releases/download/${version}/ghq_linux_${arch}.zip
-  unzip -j ${zip_path} ghq_linux_${arch}/ghq -d "$bin_dir"
+  curl -L -o "${zip_path}" ${repo_url}/releases/download/"${version}"/ghq_linux_"${arch}".zip
+  unzip -j "${zip_path}" ghq_linux_"${arch}"/ghq -d "$bin_dir"
 fi

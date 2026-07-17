@@ -2,12 +2,12 @@
 set -eu
 
 apt_key_file=/etc/apt/keyrings/keepassxc.asc
-distrib=$(lsb_release -is | tr A-Z a-z)
+distrib=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
 
 install_deb_packages() {
   for pkg in "$@"; do
-    if [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" != 'install ok installed' ]; then
-      echo $pkg
+    if [ "$(dpkg-query -f '${Status}' -W "$pkg" 2>/dev/null)" != 'install ok installed' ]; then
+      echo "$pkg"
     fi
   done | xargs -r sudo apt-get install -y
 }

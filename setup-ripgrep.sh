@@ -14,7 +14,7 @@ if [ "$installed_version" != "$version" ]; then
   arch="$(uname -m)"
   tarball_url="${repo_url}/releases/download/${version}/ripgrep-${version}-${arch}-unknown-linux-musl.tar.gz"
   mkdir -p "${bin_dir}"
-  curl -sSL "${tarball_url}" | tar zx -C "${bin_dir}" --strip-components 1 ripgrep-${version}-${arch}-unknown-linux-musl/rg
+  curl -sSL "${tarball_url}" | tar zx -C "${bin_dir}" --strip-components 1 ripgrep-"${version}"-"${arch}"-unknown-linux-musl/rg
 
   # install bash completions file
   completions_dir="${HOME}/.local/share/bash-completion/completions"

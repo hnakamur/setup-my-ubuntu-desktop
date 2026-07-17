@@ -2,8 +2,8 @@
 
 install_deb_packages() {
   for pkg in "$@"; do
-    if [ "$(dpkg-query -f '${Status}' -W $pkg 2>/dev/null)" != 'install ok installed' ]; then
-      echo $pkg
+    if [ "$(dpkg-query -f '${Status}' -W "$pkg" 2>/dev/null)" != 'install ok installed' ]; then
+      echo "$pkg"
     fi
   done | xargs -r sudo apt-get install -y
 }
@@ -15,7 +15,7 @@ if ! type clickhouse-client 2>/dev/null; then
   if [ ! -f "$key_path" ]; then
     install_deb_packages apt-transport-https ca-certificates curl gnupg
 
-    sudo mkdir -p $(dirname "$key_path")
+    sudo mkdir -p "$(dirname "$key_path")"
     curl -sSL 'https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key' | sudo gpg --dearmor -o "$key_path"
   fi
 
